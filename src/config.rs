@@ -1,6 +1,7 @@
 use serde_derive::{Serialize, Deserialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use anyhow::Result;
+use crate::env::get_hogg_dir;
 use crate::scanner::Scanner;
 
 use crate::scanner::scanners::GitCredsScanner;
@@ -17,8 +18,8 @@ pub fn load_config(path: &Path) -> Result<Config> {
 }
 
 impl Config {
-    pub fn get_hijackers_path(&self) -> &Path {
-        Path::new(self.hijackers_path.as_str())
+    pub fn get_hijackers_path(&self) -> PathBuf {
+        Path::new(get_hogg_dir().as_str()).join(self.hijackers_path.as_str())
     }
 
     pub fn scanners_vec(&self) -> Vec<Box<dyn Scanner + Send + Sync>> {

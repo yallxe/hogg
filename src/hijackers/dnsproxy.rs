@@ -98,6 +98,10 @@ impl DnsProxyHijacker {
 
 #[async_trait]
 impl Hijacker for DnsProxyHijacker {
+    fn name(&self) -> String {
+        "DNS Proxy Hijacker".to_string()
+    }
+
     async fn run(&mut self, scanner_ctx: &ServicesScanner) {
         self.socket = match UdpSocket::bind(self.configuration.bind.clone()).await {
             Ok(socket) => Some(socket),

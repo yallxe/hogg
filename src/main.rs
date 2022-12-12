@@ -1,9 +1,11 @@
 use anyhow::Result;
+use env::get_hogg_dir;
 use hijackers::dnsproxy::DnsProxyHijacker;
 use crate::hijackers::Hijacker;
 
 mod scanner;
 mod hijackers;
+mod env;
 mod config;
 
 #[macro_export]
@@ -19,10 +21,25 @@ macro_rules! exit {
 #[tokio::main]
 async fn main() -> Result<()> {
     logs::Logs::new().init();
-    let config = config::load_config(std::path::Path::new("config.toml"))?;
+
+    let config_path = get_hogg_dir();
+
+    let config = match config::load_config(
+        std::path::Path::new(&config_path).join("config.toml").as_path()
+    ) {
+        Ok(config) => config,
+        Err(e) => exit!("Failed to load {}/config.toml: {}", config_path, e)
+    };
 
     let scanner = scanner::ServicesScanner::new(config.scanners_vec());
-    DnsProxyHijacker::new(&config)?.run(&scanner).await;
+
+    match DnsProxyHijacker::new(&config) {
+        Ok(mut hijacker) => {
+            logs::info!("{} has been started", hijacker.name());
+            hijacker.run(&scanner).await;
+        },
+        Err(_) => {}
+    };
 
     Ok(())
 }
