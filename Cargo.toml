@@ -2,6 +2,7 @@
 name = "hogg"
 version = "0.1.0"
 edition = "2021"
+proc-macro = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,5 +11,8 @@ anyhow = "1.0.66"
 async-trait = "0.1.59"
 logs = "0.7.1"
 reqwest = { version = "0.11.13", features = ["cookies"] }
+serde = "1.0.150"
+serde_derive = "1.0.150"
 tokio = { version = "1.18.2", features = ["rt-multi-thread", "macros", "fs", "io-util", "net", "time", "sync"] }
+toml = "0.5.9"
 

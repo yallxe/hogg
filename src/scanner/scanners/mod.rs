@@ -15,3 +15,5 @@ pub fn default_http_client() -> reqwest::ClientBuilder {
 }
 
 pub mod gitcreds;
+
+pub use gitcreds::GitCredsScanner;

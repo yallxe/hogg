@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, time::Duration};
+use std::time::Duration;
 use async_trait::async_trait;
 use crate::hijackers::Hijacker;
 use crate::scanner::ServicesScanner;
@@ -6,20 +6,35 @@ use anyhow::{anyhow, Result};
 use hogg::{BytePacketBuffer, DnsPacket};
 use logs::error;
 use tokio::{net::UdpSocket, time::timeout};
+use crate::config::Config;
+use serde_derive::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
+pub struct DnsProxyHijackerConfiguration {
+    pub enabled: bool,
+    pub bind: String,
+    pub upstreams: Vec<String>
+}
 
 pub struct DnsProxyHijacker {
-    pub bind: SocketAddr,
-    pub upstreams: Vec<SocketAddr>,
+    configuration: DnsProxyHijackerConfiguration,
 
     socket: Option<UdpSocket>,
 }
 
 impl DnsProxyHijacker {
-    pub fn new(bind: SocketAddr, upstreams: Vec<SocketAddr>) -> Self {
-        Self {
-            bind, upstreams,
-            socket: None,
+    pub fn new(config_ctx: &Config) -> Result<Self> {
+        let configuration: DnsProxyHijackerConfiguration =
+            toml::from_slice(std::fs::read(
+                config_ctx.get_hijackers_path().join("dnsproxy.toml")
+            )?.as_slice())?;
+        if !configuration.enabled {
+            return Err(anyhow!("Hijacker is disabled"));
         }
+        Ok(Self {
+            configuration,
+            socket: None,
+        })
     }
 
     pub async fn proxy_worker(&self, scanner_ctx: &ServicesScanner) -> Result<()> {
@@ -61,7 +76,7 @@ impl DnsProxyHijacker {
     async fn dispatch(&self, req: BytePacketBuffer, len: usize) -> Result<BytePacketBuffer> {
         let buf = &req.buf[..len];
 
-        for addr in self.upstreams.iter() {
+        for addr in self.configuration.upstreams.iter() {
             let socket = UdpSocket::bind(("0.0.0.0", 0)).await?;
 
             let data: Result<BytePacketBuffer> = timeout(Duration::from_secs(3), async {
@@ -84,7 +99,7 @@ impl DnsProxyHijacker {
 #[async_trait]
 impl Hijacker for DnsProxyHijacker {
     async fn run(&mut self, scanner_ctx: &ServicesScanner) {
-        self.socket = match UdpSocket::bind(self.bind).await {
+        self.socket = match UdpSocket::bind(self.configuration.bind.clone()).await {
             Ok(socket) => Some(socket),
             Err(e) => {
                 error!("DnsProxyHijacked failed to start: {}", e);

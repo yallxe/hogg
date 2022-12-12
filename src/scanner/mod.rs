@@ -1,5 +1,5 @@
 use anyhow::Result;
-use self::scanners::Scanner;
+pub use self::scanners::Scanner;
 
 pub mod scanners;
 
@@ -27,7 +27,7 @@ impl ServicesScanner {
             answers.append(&mut scanner.process(&target).await?);
         }
 
-        // println!("{:#?}", answers);
+        logs::debug!("Found detections during scanning of {}: {:#?}", target, answers);
         Ok(answers)
     }
 }

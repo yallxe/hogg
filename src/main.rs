@@ -1,10 +1,10 @@
 use anyhow::Result;
 use hijackers::dnsproxy::DnsProxyHijacker;
 use crate::hijackers::Hijacker;
-use crate::scanner::scanners::gitcreds::GitCredsScanner;
 
 mod scanner;
 mod hijackers;
+mod config;
 
 #[macro_export]
 macro_rules! exit {
@@ -16,16 +16,13 @@ macro_rules! exit {
     };
 }
 
-
 #[tokio::main]
 async fn main() -> Result<()> {
     logs::Logs::new().init();
-    let scanner = scanner::ServicesScanner::new(vec![
-        Box::new(GitCredsScanner {})
-    ]);
-    DnsProxyHijacker::new("127.0.0.1:53".parse()?, vec![
-        "1.1.1.1:53".parse()?
-    ]).run(&scanner).await;
+    let config = config::load_config(std::path::Path::new("config.toml"))?;
+
+    let scanner = scanner::ServicesScanner::new(config.scanners_vec());
+    DnsProxyHijacker::new(&config)?.run(&scanner).await;
 
     Ok(())
 }

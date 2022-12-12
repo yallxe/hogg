@@ -1,2 +1,5 @@
 /target
 .fleet
+
+config.toml
+.hijackers
