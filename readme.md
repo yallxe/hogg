@@ -19,8 +19,8 @@ Not yet, but I want to add something more. At least I want to think about HTTP p
  - You may NOT get a full interception of DNS packets yet.
 
 # Todo stuff
- [+] Proof of Concept working DNS Sniffer-Proxy + Any scanner, as an example Git Credentials Leak checker
- [ ] Add more scanners
- [ ] Add DNS Network Sniffer (not a proxy!!!), like it would be a wireshark network sniffer
- [ ] Add DNS-over-HTTPS support for DNS Proxy.
+- [x] Proof of Concept working DNS Sniffer-Proxy + Any scanner, as an example Git Credentials Leak checker
+- [ ] Add more scanners
+- [ ] Add DNS Network Sniffer (not a proxy!!!), like it would be a wireshark network sniffer
+- [ ] Add DNS-over-HTTPS support for DNS Proxy.
 
