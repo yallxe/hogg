@@ -4,7 +4,7 @@ use anyhow::Result;
 use crate::env::get_hogg_dir;
 use crate::scanner::Scanner;
 
-use crate::scanner::scanners::GitCredsScanner;
+use crate::scanner::scanners::GitDirectoryScanner;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -24,7 +24,7 @@ impl Config {
 
     pub fn scanners_vec(&self) -> Vec<Box<dyn Scanner + Send + Sync>> {
         let mut result: Vec<Box<dyn Scanner + Send + Sync>> = vec![];
-        if self.gitcreds_enabled { result.push(Box::new(GitCredsScanner {})) };
+        if self.gitcreds_enabled { result.push(Box::new(GitDirectoryScanner {})) };
 
         result
     }

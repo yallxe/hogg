@@ -1,11 +1,11 @@
 use crate::scanner::{scanners::{Scanner, default_http_client}, ScanAnswer};
 use async_trait::async_trait;
 
-pub struct GitCredsScanner {}
+pub struct GitDirectoryScanner {}
 
 #[async_trait]
-impl Scanner for GitCredsScanner {
-    fn name(&self) -> String { "Git Credentials Leak".to_string() }
+impl Scanner for GitDirectoryScanner {
+    fn name(&self) -> String { "Git Directory Leak".to_string() }
 
     async fn process(&self, target: &String) -> anyhow::Result<Vec<ScanAnswer>> {
         let client = default_http_client().build()?;
