@@ -7,13 +7,13 @@ const USER_AGENT: &str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleW
 #[async_trait]
 pub trait Scanner {
     fn name(&self) -> String;
-    async fn process(&self, target: &String) -> Result<Vec<ScanAnswer>>;
+    async fn process(&self, target: &str) -> Result<Vec<ScanAnswer>>;
 }
 
 pub fn default_http_client() -> reqwest::ClientBuilder {
     reqwest::Client::builder().user_agent(USER_AGENT).cookie_store(true)
 }
 
-pub mod gitcreds;
+pub mod gitdirectory;
 
-pub use gitcreds::GitDirectoryScanner;
+pub use gitdirectory::GitDirectoryScanner;

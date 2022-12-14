@@ -74,7 +74,7 @@ impl DnsProxyHijacker {
     }
 
     async fn dispatch(&self, req: BytePacketBuffer, len: usize) -> Result<BytePacketBuffer> {
-        if self.configuration.upstreams.len() == 0 {
+        if self.configuration.upstreams.is_empty() {
             return Err(anyhow!("No upstreams found."));
         }
 

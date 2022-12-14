@@ -7,9 +7,9 @@ pub struct GitDirectoryScanner {}
 impl Scanner for GitDirectoryScanner {
     fn name(&self) -> String { "Git Directory Leak".to_string() }
 
-    async fn process(&self, target: &String) -> anyhow::Result<Vec<ScanAnswer>> {
+    async fn process(&self, target: &str) -> anyhow::Result<Vec<ScanAnswer>> {
         let client = default_http_client().build()?;
-        let response = client.get(reqwest::Url::parse(target.as_str())?.join("/.git/config")?)
+        let response = client.get(reqwest::Url::parse(target)?.join("/.git/config")?)
             .send().await?;
 
         let url = response.url().to_string();
