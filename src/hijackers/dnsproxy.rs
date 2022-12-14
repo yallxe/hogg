@@ -1,19 +1,19 @@
-use std::time::Duration;
-use async_trait::async_trait;
+use crate::config::Config;
 use crate::hijackers::Hijacker;
 use crate::scanner::ServicesScanner;
 use anyhow::{anyhow, Result};
+use async_trait::async_trait;
 use hogg::{BytePacketBuffer, DnsPacket};
 use logs::error;
+use serde_derive::{Deserialize, Serialize};
+use std::time::Duration;
 use tokio::{net::UdpSocket, time::timeout};
-use crate::config::Config;
-use serde_derive::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct DnsProxyHijackerConfiguration {
     pub enabled: bool,
     pub bind: String,
-    pub upstreams: Vec<String>
+    pub upstreams: Vec<String>,
 }
 
 pub struct DnsProxyHijacker {
@@ -24,10 +24,9 @@ pub struct DnsProxyHijacker {
 
 impl DnsProxyHijacker {
     pub fn new(config_ctx: &Config) -> Result<Self> {
-        let configuration: DnsProxyHijackerConfiguration =
-            toml::from_slice(std::fs::read(
-                config_ctx.get_hijackers_path().join("dnsproxy.toml")
-            )?.as_slice())?;
+        let configuration: DnsProxyHijackerConfiguration = toml::from_slice(
+            std::fs::read(config_ctx.get_hijackers_path().join("dnsproxy.toml"))?.as_slice(),
+        )?;
         if !configuration.enabled {
             return Err(anyhow!("Hijacker is disabled"));
         }
@@ -39,7 +38,9 @@ impl DnsProxyHijacker {
 
     pub async fn proxy_worker(&self, scanner_ctx: &ServicesScanner) -> Result<()> {
         if self.socket.is_none() {
-            return Err(anyhow!("Socket wasn't established, but worker function of DNS Proxy Hijacker was called"));
+            return Err(anyhow!(
+                "Socket wasn't established, but worker function of DNS Proxy Hijacker was called"
+            ));
         }
         let socket = self.socket.as_ref().unwrap();
 
@@ -48,7 +49,10 @@ impl DnsProxyHijacker {
         let (len, src) = match socket.recv_from(&mut req.buf).await {
             Ok((len, src)) => (len, src),
             Err(e) => {
-                error!("DnsProxyHijacker failed to recv_from with downstream: {}", e);
+                error!(
+                    "DnsProxyHijacker failed to recv_from with downstream: {}",
+                    e
+                );
                 return Ok(());
             }
         };
@@ -61,13 +65,19 @@ impl DnsProxyHijacker {
             }
         };
 
-        if let Some(q) = DnsPacket::from_buffer(&mut upstream_response)?.questions.get(0) {
+        if let Some(q) = DnsPacket::from_buffer(&mut upstream_response)?
+            .questions
+            .get(0)
+        {
             scanner_ctx.scan(format!("http://{}", q.name)).await?;
             scanner_ctx.scan(format!("https://{}", q.name)).await?;
         }
 
         if let Err(e) = socket.send_to(&upstream_response.buf, &src).await {
-            error!("DnsProxyHijacker failed to send packet to downstream: {}", e)
+            error!(
+                "DnsProxyHijacker failed to send packet to downstream: {}",
+                e
+            )
         }
 
         Ok(())
@@ -88,14 +98,16 @@ impl DnsProxyHijacker {
                 let mut res = BytePacketBuffer::new();
                 socket.recv_from(&mut res.buf).await?;
                 Ok(res)
-            }).await {
+            })
+            .await
+            {
                 Ok(data) => data,
-                Err(_) => continue
+                Err(_) => continue,
             };
 
             match data {
                 Ok(data) => return Ok(data),
-                Err(e) => return Err(e)
+                Err(e) => return Err(e),
             };
         }
 

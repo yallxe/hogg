@@ -6,7 +6,9 @@ pub fn get_hogg_dir() -> String {
         Err(_) => {
             unsafe {
                 if !WARN_PRINTED {
-                    logs::warn!("HOGG_CONFIG_DIR environment variable is not set, using default path");
+                    logs::warn!(
+                        "HOGG_CONFIG_DIR environment variable is not set, using default path"
+                    );
                     WARN_PRINTED = true;
                 }
             }

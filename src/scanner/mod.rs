@@ -1,16 +1,16 @@
-use anyhow::Result;
 pub use self::scanners::Scanner;
+use anyhow::Result;
 
 pub mod scanners;
 
 #[derive(Debug)]
 pub struct ScanAnswer {
     pub full_url: String,
-    pub detection_name: String
+    pub detection_name: String,
 }
 
 pub struct ServicesScanner {
-    scanners: Vec<Box<dyn Scanner + Send + Sync>>
+    scanners: Vec<Box<dyn Scanner + Send + Sync>>,
 }
 
 impl ServicesScanner {
@@ -27,7 +27,11 @@ impl ServicesScanner {
             answers.append(&mut scanner.process(&target).await?);
         }
 
-        logs::debug!("Found detections during scanning of {}: {:#?}", target, answers);
+        logs::debug!(
+            "Found detections during scanning of {}: {:#?}",
+            target,
+            answers
+        );
         Ok(answers)
     }
 }
