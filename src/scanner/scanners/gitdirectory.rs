@@ -16,7 +16,7 @@ impl Scanner for GitDirectoryScanner {
         logs::debug!("{}", url);
         let mut answers: Vec<ScanAnswer> = vec![];
 
-        if response.text().await.unwrap_or(String::new()).starts_with("[core]") {
+        if response.text().await.unwrap_or_default().contains("[core]") {
             answers.push(ScanAnswer { full_url: url, detection_name: self.name() })
         }
 
