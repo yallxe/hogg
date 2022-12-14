@@ -74,17 +74,24 @@ impl DnsProxyHijacker {
     }
 
     async fn dispatch(&self, req: BytePacketBuffer, len: usize) -> Result<BytePacketBuffer> {
+        if self.configuration.upstreams.len() == 0 {
+            return Err(anyhow!("No upstreams found."));
+        }
+
         let buf = &req.buf[..len];
 
         for addr in self.configuration.upstreams.iter() {
             let socket = UdpSocket::bind(("0.0.0.0", 0)).await?;
 
-            let data: Result<BytePacketBuffer> = timeout(Duration::from_secs(3), async {
+            let data: Result<BytePacketBuffer> = match timeout(Duration::from_secs(3), async {
                 socket.send_to(buf, addr).await?;
                 let mut res = BytePacketBuffer::new();
                 socket.recv_from(&mut res.buf).await?;
                 Ok(res)
-            }).await?;
+            }).await {
+                Ok(data) => data,
+                Err(_) => continue
+            };
 
             match data {
                 Ok(data) => return Ok(data),
@@ -92,7 +99,7 @@ impl DnsProxyHijacker {
             };
         }
 
-        Err(anyhow!("No upstreams found."))
+        Err(anyhow!("No upstreams responded."))
     }
 }
 
