@@ -33,13 +33,13 @@ async fn main() -> Result<()> {
 
     let scanner = scanner::ServicesScanner::new(config.scanners_vec());
 
-    match DnsProxyHijacker::new(&config) {
-        Ok(mut hijacker) => {
-            logs::info!("{} has been started", hijacker.name());
+    if let Ok(mut hijacker) = DnsProxyHijacker::new(&config) {
+        logs::info!("{} has been started", hijacker.name());
+        hijacker.run(&scanner).await;
+        tokio::spawn(async move {
             hijacker.run(&scanner).await;
-        },
-        Err(_) => {}
-    };
-
+        });
+    }
+    
     Ok(())
 }
