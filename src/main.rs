@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         Err(e) => exit!("Failed to load {}/config.toml: {}", config_path, e),
     };
 
-    let scanner = scanner::ServicesScanner::new(config.scanners_vec());
+    let scanner = scanner::ServicesScanner::new("nuclei".to_string());
 
     if let Ok(mut hijacker) = DnsProxyHijacker::new(&config) {
         logs::info!("{} has been started", hijacker.name());

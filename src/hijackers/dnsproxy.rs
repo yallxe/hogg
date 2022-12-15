@@ -65,19 +65,20 @@ impl DnsProxyHijacker {
             }
         };
 
-        if let Some(q) = DnsPacket::from_buffer(&mut upstream_response)?
-            .questions
-            .get(0)
-        {
-            scanner_ctx.scan(format!("http://{}", q.name)).await?;
-            scanner_ctx.scan(format!("https://{}", q.name)).await?;
-        }
-
         if let Err(e) = socket.send_to(&upstream_response.buf, &src).await {
             error!(
                 "DnsProxyHijacker failed to send packet to downstream: {}",
                 e
             )
+        }
+
+        if let Some(q) = DnsPacket::from_buffer(&mut upstream_response)?
+            .questions
+            .get(0)
+        {
+            if let Err(e) = scanner_ctx.scan(q.name.to_string()).await {
+                error!("Failed to scan: {}", e);
+            }
         }
 
         Ok(())

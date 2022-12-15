@@ -1,7 +1,6 @@
-pub use self::scanners::Scanner;
-use anyhow::Result;
+use std::path::Path;
 
-pub mod scanners;
+use anyhow::Result;
 
 #[derive(Debug)]
 pub struct ScanAnswer {
@@ -10,28 +9,19 @@ pub struct ScanAnswer {
 }
 
 pub struct ServicesScanner {
-    scanners: Vec<Box<dyn Scanner + Send + Sync>>,
+    nuclei_path: String,
 }
 
 impl ServicesScanner {
-    pub fn new(scanners: Vec<Box<dyn Scanner + Send + Sync>>) -> Self {
-        Self { scanners }
+    pub fn new(nuclei_path: String) -> Self {
+        Self { nuclei_path }
     }
 
     pub async fn scan(&self, target: String) -> Result<Vec<ScanAnswer>> {
         logs::debug!("Scanning: {}", target);
         let mut answers: Vec<ScanAnswer> = vec![];
+        // TODO: Nuclei scan
 
-        for scanner in self.scanners.iter() {
-            logs::info!("Performing {} on {}", scanner.name(), target);
-            answers.append(&mut scanner.process(&target).await?);
-        }
-
-        logs::debug!(
-            "Found detections during scanning of {}: {:#?}",
-            target,
-            answers
-        );
         Ok(answers)
     }
 }
