@@ -31,6 +31,7 @@ Not yet, but I want to add something more. At least I want to think about HTTP p
 ## Todo stuff
 
 - [x] Working DNS Proxy + Nuclei scanner
+- [ ] Add notifications
 - [ ] Add more scanners
 - [ ] Add DNS Network Sniffer (not a proxy!!!), like it would be a wireshark network sniffer
 - [ ] Add DNS-over-HTTPS support for DNS Proxy.
