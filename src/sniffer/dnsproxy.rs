@@ -1,4 +1,4 @@
-use crate::hijackers::Hijacker;
+use crate::sniffer::Sniffer;
 use crate::scanner::ServicesScanner;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
@@ -9,27 +9,33 @@ use std::{time::Duration, path::Path};
 use tokio::{net::UdpSocket, time::timeout};
 
 #[derive(Serialize, Deserialize)]
-pub struct DnsProxyHijackerConfiguration {
+pub struct DnsProxySnifferConfiguration {
     pub enabled: bool,
     pub bind: String,
     pub upstreams: Vec<String>,
 }
 
-pub struct DnsProxyHijacker {
-    configuration: DnsProxyHijackerConfiguration,
+pub struct DnsProxySniffer {
+    configuration: DnsProxySnifferConfiguration,
 
     socket: Option<UdpSocket>,
 }
 
-impl DnsProxyHijacker {
+impl DnsProxySniffer {
     pub fn new() -> Result<Self> {
-        new_hijacker!("dnsproxy.toml")
+        match get_configuration!("dnsproxy.toml", DnsProxySnifferConfiguration) {
+            Ok(configuration) => Ok(Self {
+                configuration,
+                socket: None,
+            }),
+            Err(e) => Err(e),
+        }
     }
 
     pub async fn proxy_worker(&self, scanner_ctx: &ServicesScanner) -> Result<()> {
         if self.socket.is_none() {
             return Err(anyhow!(
-                "Socket wasn't established, but worker function of DNS Proxy Hijacker was called"
+                "Socket wasn't established, but worker function of DNS Proxy Sniffer was called"
             ));
         }
         let socket = self.socket.as_ref().unwrap();
@@ -40,7 +46,7 @@ impl DnsProxyHijacker {
             Ok((len, src)) => (len, src),
             Err(e) => {
                 error!(
-                    "DnsProxyHijacker failed to recv_from with downstream: {}",
+                    "DnsProxySniffer failed to recv_from with downstream: {}",
                     e
                 );
                 return Ok(());
@@ -50,14 +56,14 @@ impl DnsProxyHijacker {
         let mut upstream_response = match self.dispatch(req, len).await {
             Ok(res) => res,
             Err(e) => {
-                error!("DnsProxyHijacker failed to dispatch packet: {}", e);
+                error!("DnsProxySniffer failed to dispatch packet: {}", e);
                 return Ok(());
             }
         };
 
         if let Err(e) = socket.send_to(&upstream_response.buf, &src).await {
             error!(
-                "DnsProxyHijacker failed to send packet to downstream: {}",
+                "DnsProxySniffer failed to send packet to downstream: {}",
                 e
             )
         }
@@ -108,22 +114,22 @@ impl DnsProxyHijacker {
 }
 
 #[async_trait]
-impl Hijacker for DnsProxyHijacker {
+impl Sniffer for DnsProxySniffer {
     fn name(&self) -> String {
-        "DNS Proxy Hijacker".to_string()
+        "DNS Proxy Sniffer".to_string()
     }
 
     async fn run(&mut self, scanner_ctx: &ServicesScanner) {
         self.socket = match UdpSocket::bind(self.configuration.bind.clone()).await {
             Ok(socket) => Some(socket),
             Err(e) => {
-                error!("DnsProxyHijacked failed to start: {}", e);
+                error!("DnsProxySniffer failed to start: {}", e);
                 return;
             }
         };
         loop {
             if let Err(e) = self.proxy_worker(scanner_ctx).await {
-                error!("DnsProxyHijacker crashed due to: {}", e);
+                error!("DnsProxySniffer crashed due to: {}", e);
                 break;
             }
         }

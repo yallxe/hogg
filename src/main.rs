@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use crate::hijackers::Hijacker;
+use crate::sniffer::Sniffer;
 use anyhow::Result;
 use env::get_hogg_dir;
-use hijackers::dnsproxy::DnsProxyHijacker;
+use sniffer::dnsproxy::DnsProxySniffer;
 
 mod config;
 mod env;
-mod hijackers;
+mod sniffer;
 mod scanner;
 
 #[macro_export]
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
 
     let scanner = Arc::new(scanner::ServicesScanner::new(&config));
 
-    if let Ok(mut hijacker) = DnsProxyHijacker::new() {
+    if let Ok(mut hijacker) = DnsProxySniffer::new() {
         let scanner = scanner.clone();
         tokio::spawn(async move {
             logs::info!("{} is starting up...", hijacker.name());
