@@ -1,19 +1,26 @@
-use crate::env::get_hogg_dir;
 use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-#[derive(Serialize, Deserialize, Debug)]
+fn default_nuclei_path() -> String {
+    "nuclei".to_string()
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NucleiConfig {
+    #[serde(default="default_nuclei_path")]
+    pub nuclei_path: String,
+    pub config_file: String,
+    #[serde(default)]
+    pub cli_args: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
-    hijackers_path: String
+    pub hijackers_path: String,
+    pub nuclei: NucleiConfig,
 }
 
 pub fn load_config(path: &Path) -> Result<Config> {
     Ok(toml::from_slice(std::fs::read(path)?.as_slice())?)
-}
-
-impl Config {
-    pub fn get_hijackers_path(&self) -> PathBuf {
-        Path::new(get_hogg_dir().as_str()).join(self.hijackers_path.as_str())
-    }
 }

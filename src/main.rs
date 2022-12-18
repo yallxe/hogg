@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::hijackers::Hijacker;
 use anyhow::Result;
 use env::get_hogg_dir;
@@ -23,25 +25,25 @@ async fn main() -> Result<()> {
     logs::Logs::new().init();
 
     let config_path = get_hogg_dir();
+    std::env::set_current_dir(&config_path)?;
 
     let config = match config::load_config(
-        std::path::Path::new(&config_path)
-            .join("config.toml")
-            .as_path(),
+        std::path::Path::new("config.toml")
     ) {
         Ok(config) => config,
-        Err(e) => exit!("Failed to load {}/config.toml: {}", config_path, e),
+        Err(e) => exit!("Failed to load config.toml: {}", e),
     };
 
-    let scanner = scanner::ServicesScanner::new("nuclei".to_string());
+    let scanner = Arc::new(scanner::ServicesScanner::new(&config));
+
 
     if let Ok(mut hijacker) = DnsProxyHijacker::new(&config) {
-        logs::info!("{} has been started", hijacker.name());
-        hijacker.run(&scanner).await;
+        let scanner = scanner.clone();
         tokio::spawn(async move {
+            logs::info!("{} is starting up...", hijacker.name());
             hijacker.run(&scanner).await;
         });
     }
 
-    Ok(())
+    loop { } // required so the main thread doesn't exit
 }

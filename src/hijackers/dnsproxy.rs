@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use hogg::{BytePacketBuffer, DnsPacket};
 use logs::error;
 use serde_derive::{Deserialize, Serialize};
-use std::time::Duration;
+use std::{time::Duration, path::Path};
 use tokio::{net::UdpSocket, time::timeout};
 
 #[derive(Serialize, Deserialize)]
@@ -25,7 +25,7 @@ pub struct DnsProxyHijacker {
 impl DnsProxyHijacker {
     pub fn new(config_ctx: &Config) -> Result<Self> {
         let configuration: DnsProxyHijackerConfiguration = toml::from_slice(
-            std::fs::read(config_ctx.get_hijackers_path().join("dnsproxy.toml"))?.as_slice(),
+            std::fs::read(Path::new(&config_ctx.hijackers_path).join("dnsproxy.toml"))?.as_slice(),
         )?;
         if !configuration.enabled {
             return Err(anyhow!("Hijacker is disabled"));
@@ -92,6 +92,7 @@ impl DnsProxyHijacker {
         let buf = &req.buf[..len];
 
         for addr in self.configuration.upstreams.iter() {
+            logs::debug!("Trying {}", addr);
             let socket = UdpSocket::bind(("0.0.0.0", 0)).await?;
 
             let data: Result<BytePacketBuffer> = match timeout(Duration::from_secs(3), async {
