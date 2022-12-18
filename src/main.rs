@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use crate::sniffer::Sniffer;
+use crate::sniffers::Sniffer;
 use anyhow::Result;
 use env::get_hogg_dir;
-use sniffer::dnsproxy::DnsProxySniffer;
+use sniffers::dnsproxy::DnsProxySniffer;
 
 mod config;
 mod env;
-mod sniffer;
+mod sniffers;
 mod scanner;
 
 #[macro_export]

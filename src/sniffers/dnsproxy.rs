@@ -1,4 +1,4 @@
-use crate::sniffer::Sniffer;
+use crate::sniffers::Sniffer;
 use crate::scanner::ServicesScanner;
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
