@@ -17,7 +17,6 @@ pub struct NucleiConfig {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
-    pub hijackers_path: String,
     pub nuclei: NucleiConfig,
 }
 

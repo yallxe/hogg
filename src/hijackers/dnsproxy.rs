@@ -1,4 +1,3 @@
-use crate::config::Config;
 use crate::hijackers::Hijacker;
 use crate::scanner::ServicesScanner;
 use anyhow::{anyhow, Result};
@@ -23,17 +22,8 @@ pub struct DnsProxyHijacker {
 }
 
 impl DnsProxyHijacker {
-    pub fn new(config_ctx: &Config) -> Result<Self> {
-        let configuration: DnsProxyHijackerConfiguration = toml::from_slice(
-            std::fs::read(Path::new(&config_ctx.hijackers_path).join("dnsproxy.toml"))?.as_slice(),
-        )?;
-        if !configuration.enabled {
-            return Err(anyhow!("Hijacker is disabled"));
-        }
-        Ok(Self {
-            configuration,
-            socket: None,
-        })
+    pub fn new() -> Result<Self> {
+        new_hijacker!("dnsproxy.toml")
     }
 
     pub async fn proxy_worker(&self, scanner_ctx: &ServicesScanner) -> Result<()> {

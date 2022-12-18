@@ -36,8 +36,7 @@ async fn main() -> Result<()> {
 
     let scanner = Arc::new(scanner::ServicesScanner::new(&config));
 
-
-    if let Ok(mut hijacker) = DnsProxyHijacker::new(&config) {
+    if let Ok(mut hijacker) = DnsProxyHijacker::new() {
         let scanner = scanner.clone();
         tokio::spawn(async move {
             logs::info!("{} is starting up...", hijacker.name());
