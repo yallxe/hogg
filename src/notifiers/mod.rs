@@ -24,14 +24,12 @@ pub async fn send_telegram(data: &NucleiJsonOutput, config: &Config) -> Result<(
     let text = format!("New vulnerability found:\n```{:#?}```", data);
     map.insert("text", text.as_str());
 
-    let res = client.post(format!(
+    client.post(format!(
         "https://api.telegram.org/bot{}/sendMessage", 
         config.telegram.api_token
     ))
         .json(&map)
         .send().await?;
-
-    // logs::debug!("Telegram response: {:#?}", res);
     
     Ok(())
 }
