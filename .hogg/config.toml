@@ -1,4 +1,0 @@
-[nuclei]
-nuclei_path = "nuclei"
-config_file = "nuclei-config.yaml"
-cli_args = "-silent"

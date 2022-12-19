@@ -1,8 +1,0 @@
-templates:
-  - exposures/configs/git-config.yaml
-  - exposures/configs/phpinfo.yaml
-  - exposures/configs/exposed-gitignore.yaml
-  - exposures/files/idea-folder-exposure.yaml
-  - exposures/apis/openapi.yaml
-  - exposures/files/ds-store-file.yaml
-  - misconfiguration/server-status-localhost.yaml
