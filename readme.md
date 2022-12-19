@@ -1,6 +1,6 @@
 # hogg
 
-An experimental project, sniffing visited websites via DNS sniffing-proxy and scanning them for common exploits (e.g.: Git Credentials Leak, Apache Server Status, ...). Inspired by [![Trufflehog Chrome Extension](https://github.com/trufflesecurity/Trufflehog-Chrome-Extension)] and [![updns](https://github.com/wyhaya/updns)].
+An experimental project, sniffing visited websites via DNS sniffing-proxy and scanning them for common exploits (e.g.: Git Credentials Leak, Apache Server Status, ...). Inspired by [Trufflehog Chrome Extension](https://github.com/trufflesecurity/Trufflehog-Chrome-Extension) and [updns](https://github.com/wyhaya/updns).
 
 ## Should I use it now?
 
