@@ -1,10 +1,10 @@
 # hogg
 
-An experimental project, sniffing visited websites via DNS sniffing-proxy and scanning them for common exploits (e.g.: Git Credentials Leak, Apache Server Status, ...). Inspired by Trufflehog and updns.
+An experimental project, sniffing visited websites via DNS sniffing-proxy and scanning them for common exploits (e.g.: Git Credentials Leak, Apache Server Status, ...). Inspired by [![Trufflehog Chrome Extension](https://github.com/trufflesecurity/Trufflehog-Chrome-Extension)] and [![updns](https://github.com/wyhaya/updns)].
 
 ## Should I use it now?
 
-Its kinda buggy, so user expirience might be uncomfortable for now.
+As an expirement, why not? Hopefully, nothing will crash, but I can't guarantee that. Issues are opened.
 
 ## Why DNS?
 
@@ -26,12 +26,12 @@ Not yet, but I want to add something more. At least I want to think about HTTP p
 
 - You are currently unable to use DNS-over-HTTPS or other similar solutions
 - You currently have change your DNS servers to localhost (127.0.0.1)
-- You may NOT get a full interception of DNS packets yet.
+- You may **NOT** get a full interception of DNS packets, because some application may use their own DNS servers, ignoring your system-wide DNS settings.
 
 ## Todo stuff
 
 - [x] Working DNS Proxy + Nuclei scanner
-- [ ] Add notifications
-- [ ] Add more scanners
-- [ ] Add DNS Network Sniffer (not a proxy!!!), like it would be a wireshark network sniffer
-- [ ] Add DNS-over-HTTPS support for DNS Proxy.
+- [x] Add notifications (Currently telegram and system notifications)
+- [ ] Add automatic traffic redirection to DNS Proxy
+- [ ] Add GUI (probably through tray icon)
+- [ ] Add DNS-over-HTTPS proxy.
