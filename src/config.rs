@@ -16,8 +16,15 @@ pub struct NucleiConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TelegramConfig {
+    pub api_token: String,
+    pub chat_id: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub nuclei: NucleiConfig,
+    pub telegram: TelegramConfig,
 }
 
 pub fn load_config(path: &Path) -> Result<Config> {

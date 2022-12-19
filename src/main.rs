@@ -9,6 +9,7 @@ mod config;
 mod env;
 mod sniffers;
 mod scanner;
+mod notifiers;
 
 #[macro_export]
 macro_rules! exit {
@@ -34,7 +35,7 @@ async fn main() -> Result<()> {
         Err(e) => exit!("Failed to load config.toml: {}", e),
     };
 
-    let scanner = Arc::new(scanner::ServicesScanner::new(&config));
+    let scanner = Arc::new(scanner::ServicesScanner::new(config));
 
     if let Ok(mut hijacker) = DnsProxySniffer::new() {
         let scanner = scanner.clone();

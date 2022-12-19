@@ -3,9 +3,9 @@ use serde::{Serialize, Deserialize};
 use tokio::{process, io::{BufReader, AsyncBufReadExt}};
 use anyhow::Result;
 
-use crate::config::{Config, NucleiConfig};
+use crate::{config::Config, notifiers::scanner_notify};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NucleiTreeInfo {
     pub name: String,
     pub author: Vec<String>,
@@ -15,7 +15,7 @@ pub struct NucleiTreeInfo {
     pub reference: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct NucleiJsonOutput {
     pub template: String,
     #[serde(rename = "template-id")]
@@ -39,26 +39,26 @@ pub struct NucleiJsonOutput {
 }
 
 pub struct ServicesScanner {
-    nuclei_config: NucleiConfig,
+    config: Config,
 }
 
 impl ServicesScanner {
-    pub fn new(config_ctx: &Config) -> Self {
-        Self { nuclei_config: config_ctx.nuclei.clone() }
+    pub fn new(config_ctx: Config) -> Self {
+        Self { config: config_ctx }
     }
 
     pub async fn scan(&self, target: String) -> Result<Vec<NucleiJsonOutput>> {
         logs::debug!("Scanning: {}", target);
         let mut answers: Vec<NucleiJsonOutput> = vec![];
 
-        let mut cmd = process::Command::new(self.nuclei_config.nuclei_path.as_str());
+        let mut cmd = process::Command::new(self.config.nuclei.nuclei_path.as_str());
         cmd.stdout(Stdio::piped());
         cmd
             .arg("-u").arg(target.as_str())
-            .arg("-config").arg(self.nuclei_config.config_file.as_str())
+            .arg("-config").arg(self.config.nuclei.config_file.as_str())
             .arg("--json");
             
-            cmd.args(self.nuclei_config.cli_args.split(" "));
+            cmd.args(self.config.nuclei.cli_args.split(" "));
 
         let mut child = cmd.spawn()
             .expect("failed to spawn command");
@@ -82,8 +82,13 @@ impl ServicesScanner {
                 }
             };
 
-            logs::debug!("{:#?}", json);
-            answers.push(json);
+            logs::debug!("New nuclei profits: {:#?}", json);
+            answers.push(json.clone());
+
+            let c = self.config.clone();
+            tokio::spawn(async move { 
+                scanner_notify(json, &c).await.unwrap();
+            });
         }
 
         Ok(answers)
