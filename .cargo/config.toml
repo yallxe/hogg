@@ -1,0 +1,2 @@
+[env]
+HOGG_CONFIG_DIR = "./.hogg"
