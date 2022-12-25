@@ -1,0 +1,23 @@
+[dnsproxy]
+bind = "127.0.0.1:53"
+upstreams = ["1.1.1.1:53", "8.8.8.8:53"]
+
+[daemon.api]
+enabled = true
+bind = "127.0.0.1:1309"
+
+[scanner]
+check-force-ssl = true
+
+[scanner.nuclei]
+nuclei-executable = "nuclei" # default is 'nuclei'
+cli-args = ["-silent"]
+using-community-templates = [
+    "exposures/configs/git-config.yaml",
+    "exposures/configs/phpinfo-files.yaml",
+    "exposures/configs/exposed-gitignore.yaml",
+    "exposures/files/idea-folder-exposure.yaml",
+    "exposures/apis/openapi.yaml",
+    "exposures/files/ds-store-file.yaml",
+    "misconfiguration/server-status-localhost.yaml",
+]

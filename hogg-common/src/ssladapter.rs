@@ -9,7 +9,7 @@ fn get_http_client() -> Client {
         .unwrap()
 }
 
-pub async fn is_force_https(domain: String) -> bool {
+pub async fn check_force_https(domain: String) -> bool {
     let client = get_http_client();
     let res = client.get(
         format!("http://{}", domain)
