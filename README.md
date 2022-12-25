@@ -10,10 +10,10 @@ cargo run
 ```
 
 ## Usage
-...
+Just `cargo run`, and then set your DNS server to `localhost:53`
 
 ## Configuration
-...
+Checkout your configuration path, which is printed when you start the program, or use `echo $HOGG_CONFIG_DIR`
 
 ## How does it work?
 1. Your browser or a desktop app resolves a domain name via DNS.
