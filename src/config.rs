@@ -15,15 +15,16 @@ pub struct NucleiConfig {
     pub cli_args: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct TelegramConfig {
-    pub api_token: String,
-    pub chat_id: String,
+    pub api_token: Option<String>,
+    pub chat_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub nuclei: NucleiConfig,
+    #[serde(default)]
     pub telegram: TelegramConfig,
 }
 
