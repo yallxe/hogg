@@ -1,5 +1,5 @@
 [nuclei]
-nuclei_path = "nuclei"
+nuclei_path = "nuclei"  # this means it will try to use nuclei from PATH
 config_file = "nuclei-config.yaml"
 cli_args = "-silent"
 
