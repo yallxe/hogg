@@ -11,6 +11,7 @@ mod env;
 mod sniffers;
 mod scanner;
 mod notifiers;
+mod optimizers;
 
 #[macro_export]
 macro_rules! exit {

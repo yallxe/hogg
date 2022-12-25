@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 use tokio::{process, io::{BufReader, AsyncBufReadExt}};
 use anyhow::Result;
 
-use crate::{config::Config, notifiers::scanner_notify};
+use crate::{config::Config, notifiers::scanner_notify, optimizers::ssladapter};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NucleiTreeInfo {
@@ -50,6 +50,11 @@ impl ServicesScanner {
     pub async fn scan(&self, target: String) -> Result<Vec<NucleiJsonOutput>> {
         logs::debug!("Scanning: {}", target);
         let mut answers: Vec<NucleiJsonOutput> = vec![];
+
+        let target = match ssladapter::is_force_https(target.clone()).await {
+            true => format!("https://{}", target),
+            false => format!("http://{}", target),
+        };
 
         let mut cmd = process::Command::new(self.config.nuclei.nuclei_path.as_str());
         cmd.stdout(Stdio::piped());
