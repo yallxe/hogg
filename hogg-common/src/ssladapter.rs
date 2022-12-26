@@ -4,16 +4,12 @@
 use reqwest::Client;
 
 fn get_http_client() -> Client {
-    Client::builder()
-        .build()
-        .unwrap()
+    Client::builder().build().unwrap()
 }
 
 pub async fn check_force_https(domain: String) -> bool {
     let client = get_http_client();
-    let res = client.get(
-        format!("http://{}", domain)
-    ).send().await;
+    let res = client.get(format!("http://{}", domain)).send().await;
 
     if let Ok(res) = res {
         if res.status().is_success() {

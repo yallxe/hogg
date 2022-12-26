@@ -1,8 +1,11 @@
 use std::vec;
 
-use hogg_common::{config::HoggConfig, ssladapter};
-use tokio::{process::Command, io::{BufReader, AsyncBufReadExt}};
 use anyhow::Result;
+use hogg_common::{config::HoggConfig, ssladapter};
+use tokio::{
+    io::{AsyncBufReadExt, BufReader},
+    process::Command,
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -54,9 +57,7 @@ pub async fn scan_with_nuclei(
         };
     }
 
-    let mut cmd = Command::new(
-        config.scanner.nuclei.nuclei_executable.clone()
-    );
+    let mut cmd = Command::new(config.scanner.nuclei.nuclei_executable.clone());
     cmd.stdout(std::process::Stdio::piped());
     cmd.args(&config.scanner.nuclei.cli_args);
     cmd.arg("--json").arg("-u").arg(target);
@@ -66,8 +67,7 @@ pub async fn scan_with_nuclei(
     }
 
     let mut child = cmd.spawn()?;
-    let stdout = child.stdout.take()
-        .expect("child should have stdout");
+    let stdout = child.stdout.take().expect("child should have stdout");
 
     let mut reader = BufReader::new(stdout).lines();
 
@@ -79,7 +79,7 @@ pub async fn scan_with_nuclei(
                 continue;
             }
         };
-        
+
         logs::debug!("New nuclei profits: {:#?}", json);
         answers.push(json);
     }

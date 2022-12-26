@@ -6,8 +6,12 @@ pub fn get_hogg_dir() -> String {
     let result = match std::env::var("HOGG_CONFIG_DIR") {
         Ok(path) => path,
         Err(_) => {
-            let default_path = ProjectDirs::from("", "", "Hogg").unwrap()
-                .config_dir().to_str().unwrap().to_string();
+            let default_path = ProjectDirs::from("", "", "Hogg")
+                .unwrap()
+                .config_dir()
+                .to_str()
+                .unwrap()
+                .to_string();
             default_path
         }
     };

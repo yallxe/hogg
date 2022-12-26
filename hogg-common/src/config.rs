@@ -1,6 +1,5 @@
-use serde_derive::{Serialize, Deserialize};
 use anyhow::Result;
-
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HoggConfig {
@@ -34,6 +33,7 @@ pub struct DaemonApiConfig {
 pub struct ScannerConfig {
     pub nuclei: ScannerNucleiConfig,
     pub check_force_ssl: bool,
+    pub cache_ttl: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -66,7 +66,7 @@ pub fn create_config_template(dir: include_dir::Dir<'_>) {
         if let Some(_) = path.parent() {
             std::fs::create_dir_all(path.parent().unwrap()).unwrap()
         }
-        
+
         if !path.exists() {
             std::fs::write(path, entry.as_file().unwrap().contents()).unwrap();
         }

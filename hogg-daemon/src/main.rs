@@ -1,10 +1,13 @@
 use std::path::Path;
 
+use anyhow::Result;
 use dnsproxy::dns_proxy_task;
 use include_dir::{include_dir, Dir};
-use anyhow::Result;
 
-use hogg_common::{config::{self, HoggConfig}, env};
+use hogg_common::{
+    config::{self, HoggConfig},
+    env,
+};
 
 mod dnsproxy;
 mod nuclei;
@@ -32,10 +35,10 @@ async fn main() -> Result<()> {
 
     config::create_config_template(CONFIG_TEMPLATE.clone());
     let config = config::HoggConfig::from_file("hogg.toml").unwrap();
-    unsafe { CONFIG = Some(config.clone()); }
+    unsafe {
+        CONFIG = Some(config.clone());
+    }
 
-    dns_proxy_task(
-        &config, scan_function,
-    ).await;
+    dns_proxy_task(&config, scan_function).await;
     Ok(())
 }
