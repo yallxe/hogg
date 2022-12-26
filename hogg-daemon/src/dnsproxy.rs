@@ -1,13 +1,19 @@
-use std::{future::Future, time::Duration};
+use std::{future::Future, time::Duration, collections::HashMap};
 
 use anyhow::{anyhow, Result};
 use hogg_common::{
     config::HoggConfig,
     dnslib::{BytePacketBuffer, DnsPacket},
 };
+use lazy_static::lazy_static;
 use tokio::{net::UdpSocket, time::timeout};
+use std::sync::Mutex;
+use chrono;
 
 type FA<R> = fn(String) -> R;
+lazy_static! {
+    static ref SCAN_CACHE: Mutex<HashMap<String, u64>> = Mutex::new(HashMap::new());
+}
 
 pub async fn dns_proxy_task(
     config: &HoggConfig,
@@ -47,7 +53,28 @@ pub async fn dns_proxy_task(
             .questions
             .get(0)
         {
-            tokio::spawn(scan_function(q.name.to_string()));
+            let domain = q.name.to_string();
+            let now = chrono::Utc::now().timestamp() as u64;
+            let mut scan_cache = SCAN_CACHE.lock().unwrap();
+            
+            if let Some(last_scan) = scan_cache.get(&domain) {
+                // Domain has been scanned before, check if TTL has expired
+                if now - last_scan > config.scanner.cache_ttl.into() {
+                    logs::debug!("Scanning {} [TTL expired]", domain);
+                    scan_cache.insert(domain.clone(), now);
+                    tokio::spawn(scan_function(domain));
+                } else {
+                    logs::debug!("Skipping {} [cache]", domain);
+                }
+            } else {
+                // Domain has not been scanned before, scan it and add to cache
+                logs::debug!("Scanning {} [first time scan]", domain);
+                scan_cache.insert(domain.clone(), now);
+                logs::trace!("Scan cache size: {:?}", scan_cache.len());
+                tokio::spawn(scan_function(domain));
+            }
+
+            drop(scan_cache);
         }
     }
 }

@@ -17,3 +17,5 @@ async-trait = "0.1.60"
 
 tokio = { version = "1.18.2", features = ["rt-multi-thread", "macros", "fs", "io-util", "net", "time", "sync", "process"] }
 serde_json = "1.0.91"
+lazy_static = "1.4.0"
+chrono = "0.4.23"
