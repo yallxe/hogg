@@ -1,19 +1,17 @@
 # Hogg 🐽
 An experimental passive website scanner. Hogg acts as a proxy between you and your DNS server and scans every website you visit for common vulnerabilities.
 
-## Installation
-Get the appropriate binary from the [GitHub Releases](https://github.com/yallxe/hogg/releases) page. If you wish to build Hogg yourself, run these commands (assuming you have Rust and Git installed):
+## Installation & Usage
+Currently you can only run the daemon. In future, you will be able to use a special CLI or GUI to interact with daemon. The daemon is responsible of sending notifications.
 ```shell
 git clone https://github.com/yallxe/hogg
 cd hogg
-cargo run
+cargo run -p hogg-deamon # requires root on linux & macos
 ```
-
-## Usage
-Just `cargo run`, and then set your DNS server to `localhost:53`
+After you run the daemon, you can set you DNS server to `localhost:53`, so all the DNS requests will be sent to hogg.
 
 ## Configuration
-Checkout your configuration path, which is printed when you start the program, or use `echo $HOGG_CONFIG_DIR`
+Checkout your configuration path, which is printed when you start the daemon, or use `echo $HOGG_CONFIG_DIR`
 
 ## How does it work?
 1. Your browser or a desktop app resolves a domain name via DNS.
@@ -32,7 +30,7 @@ Not yet. Stay tuned for future updates that may include other solutions (like an
 
 ## Progress
 - [x] Working DNS proxy and Nuclei scanner
-- [x] Notifications (Telegram and OS notifications for now)
+- [x] Notifications (OS notifications for now)
 - [ ] Automatic request redirection to DNS Proxy
 - [ ] GUI (a tray icon)
 - [ ] DNS over HTTPS
