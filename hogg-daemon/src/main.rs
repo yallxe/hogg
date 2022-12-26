@@ -31,10 +31,8 @@ async fn main() -> Result<()> {
     std::env::set_current_dir(&config_path)?; // not quite pretty technique
 
     config::create_config_template(CONFIG_TEMPLATE.clone());
-    let mut config = config::HoggConfig::from_file("hogg.toml").unwrap();
-    unsafe {
-        CONFIG = Some(config.clone());
-    }
+    let config = config::HoggConfig::from_file("hogg.toml").unwrap();
+    unsafe { CONFIG = Some(config.clone()); }
 
     dns_proxy_task(
         &config, scan_function,

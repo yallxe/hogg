@@ -62,10 +62,10 @@ impl HoggConfig {
 pub fn create_config_template(dir: include_dir::Dir<'_>) {
     for entry in dir.find("*.*").unwrap() {
         let path = entry.as_file().unwrap().path();
-        match path.parent() {
-            Some(_) => std::fs::create_dir_all(path.parent().unwrap()).unwrap(),
-            None => {},
-        };
+
+        if let Some(_) = path.parent() {
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap()
+        }
         
         if !path.exists() {
             std::fs::write(path, entry.as_file().unwrap().contents()).unwrap();

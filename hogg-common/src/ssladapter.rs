@@ -15,14 +15,11 @@ pub async fn check_force_https(domain: String) -> bool {
         format!("http://{}", domain)
     ).send().await;
 
-    match res {
-        Ok(res) => {
-            if res.url().scheme() == "https" {
-                logs::info!("Forced HTTPS redirection detected: {}", domain);
-                return true;
-            }
-        },
-        Err(_) => {}, // This can mean that unable to check if HTTPS is forced
+    if let Ok(res) = res {
+        if res.status().is_success() {
+            logs::info!("Forced HTTPS redirection detected: {}", domain);
+            return true;
+        }
     }
 
     false
