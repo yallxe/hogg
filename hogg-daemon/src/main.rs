@@ -25,7 +25,10 @@ async fn scan_function(domain: String) {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    logs::Logs::new().color(true).init();
+    match logs::Logs::new().level_from_default_env() {
+        Ok(logs) => logs.color(true).init(),
+        Err(_) => logs::Logs::new().level(logs::LevelFilter::Info).color(true).init(),
+    }
 
     let config_path = env::get_hogg_dir();
     if !Path::new(&config_path).exists() {
