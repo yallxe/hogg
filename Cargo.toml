@@ -1,20 +1,5 @@
-[package]
-name = "hogg"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-anyhow = "1.0.66"
-async-trait = "0.1.59"
-logs = "0.7.1"
-reqwest = { version = "0.11.13", features = ["cookies", "json"] }
-serde = "1.0.150"
-serde_derive = "1.0.150"
-serde_json = "1.0.91"
-tokio = { version = "1.18.2", features = ["rt-multi-thread", "macros", "fs", "io-util", "net", "time", "sync", "process"] }
-toml = "0.5.9"
-notify-rust = "4.6.0"
-include_dir = { version = "0.7.3", features = ["glob"] }
-directories = "4.0.1"
+[workspace]
+members = [
+    "hogg-daemon",
+    "hogg-common"
+]
