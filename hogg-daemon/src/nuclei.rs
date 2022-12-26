@@ -9,6 +9,8 @@ use tokio::{
 
 use serde::{Deserialize, Serialize};
 
+use crate::notifications;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NucleiTreeInfo {
     pub name: String,
@@ -81,6 +83,7 @@ pub async fn scan_with_nuclei(
         };
 
         logs::debug!("New nuclei profits: {:#?}", json);
+        notifications::show_detections_notification(&domain);
         answers.push(json);
     }
 

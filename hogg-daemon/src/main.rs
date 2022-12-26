@@ -10,6 +10,7 @@ use hogg_common::{
 };
 
 mod dnsproxy;
+mod notifications;
 mod nuclei;
 
 static CONFIG_TEMPLATE: Dir<'_> = include_dir!("resources/config-template");

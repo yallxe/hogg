@@ -19,3 +19,4 @@ tokio = { version = "1.18.2", features = ["rt-multi-thread", "macros", "fs", "io
 serde_json = "1.0.91"
 lazy_static = "1.4.0"
 chrono = "0.4.23"
+notify-rust = "4.6.0"
