@@ -8,7 +8,7 @@ bind = "127.0.0.1:1309"
 
 [scanner]
 check-force-ssl = true
-cache-ttl = 60 # seconds
+cache-ttl = 1800 # 30 minutes
 
 [scanner.nuclei]
 nuclei-executable = "nuclei" # default is 'nuclei'
