@@ -1,7 +1,8 @@
-use std::path::Path;
+use std::{path::Path, sync::Arc};
 
 use anyhow::Result;
 use dnsproxy::dns_proxy_task;
+use hogg_grpc::grpc;
 use include_dir::{include_dir, Dir};
 
 use hogg_common::{
@@ -43,6 +44,16 @@ async fn main() -> Result<()> {
         CONFIG = Some(config.clone());
     }
 
-    dns_proxy_task(&config, scan_function).await;
-    Ok(())
+    let config = Arc::new(config);
+
+    {
+        let config = config.clone();
+        tokio::spawn(async move {
+            dns_proxy_task(&config, scan_function).await;
+        });
+    }
+
+    grpc::tokio_serve_hogg_grpc()?;
+
+    loop { }
 }
