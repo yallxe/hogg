@@ -13,6 +13,8 @@ pub struct HoggConfig {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DnsProxyConfig {
+    #[serde(default)]
+    pub enabled: bool,
     pub bind: String,
     pub upstreams: Vec<String>,
 }

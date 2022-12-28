@@ -1,4 +1,5 @@
 [dnsproxy]
+enabled = true
 bind = "127.0.0.1:53"
 upstreams = ["1.1.1.1:53", "8.8.8.8:53"]
 

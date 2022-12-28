@@ -19,6 +19,11 @@ pub async fn dns_proxy_task(
     config: &HoggConfig,
     scan_function: FA<impl Future<Output = ()> + Send + 'static>,
 ) {
+    if !config.dnsproxy.enabled {
+        logs::warn!("DNS Proxy is disabled.");
+        return;
+    }
+
     let socket = match UdpSocket::bind(config.dnsproxy.bind.clone()).await {
         Ok(socket) => socket,
         Err(e) => {
