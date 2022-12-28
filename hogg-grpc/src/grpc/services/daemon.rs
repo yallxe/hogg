@@ -1,12 +1,12 @@
 use tonic::{Request, Response, Status};
 
-use crate::grpc::{DaemonHealth, PingRequest, PingResponse};
+use crate::grpc::{Daemon, PingRequest, PingResponse};
 
 #[derive(Debug, Default)]
-pub struct DaemonHealthService {}
+pub struct DaemonService {}
 
 #[tonic::async_trait]
-impl DaemonHealth for DaemonHealthService {
+impl Daemon for DaemonService {
     async fn ping(
         &self,
         request: Request<PingRequest>,

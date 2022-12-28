@@ -1,3 +1,3 @@
-pub mod daemon_health;
+pub mod daemon;
 
-pub use daemon_health::DaemonHealthService;
+pub use daemon::DaemonService;
