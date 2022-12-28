@@ -6,6 +6,9 @@ pub mod daemon_proto {
 
 pub use daemon_proto::daemon_server::{Daemon, DaemonServer};
 pub use daemon_proto::{PingRequest, PingResponse};
+use tonic::transport::Channel;
+
+use self::daemon_proto::daemon_client::DaemonClient;
 
 
 #[derive(Debug, err_derive::Error)]
@@ -25,4 +28,9 @@ pub fn tokio_serve_hogg_grpc() -> Result<tokio::task::JoinHandle<Result<(), Erro
             .await
             .map_err(Error::GrpcTransportError)
     }))
+}
+
+
+pub async fn connect_grpc_client() -> Result<DaemonClient<Channel>, Error> {
+    Ok(DaemonClient::connect("http://[::1]:1396").await?)
 }
