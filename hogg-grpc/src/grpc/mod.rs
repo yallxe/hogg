@@ -5,7 +5,7 @@ pub mod daemon_proto {
 }
 
 pub use daemon_proto::daemon_server::{Daemon, DaemonServer};
-pub use daemon_proto::{PingRequest, PingResponse};
+pub use daemon_proto::{PingRequest, PingResponse, ReloadDatabaseRequest, ReloadDatabaseResponse};
 use tonic::transport::Channel;
 
 use self::daemon_proto::daemon_client::DaemonClient;
@@ -16,10 +16,10 @@ pub enum Error {
     GrpcTransportError(#[error(source)] tonic::transport::Error),
 }
 
-pub fn tokio_serve_hogg_grpc() -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
+pub fn tokio_serve_hogg_grpc<F: Send + Sync + 'static + Fn() -> ()>(db_reload: F) -> Result<tokio::task::JoinHandle<Result<(), Error>>, Error> {
     Ok(tokio::spawn(async move {
         let addr = "[::1]:1396".parse().unwrap();
-        let daemon_health = services::DaemonService::default();
+        let daemon_health = services::DaemonService::new(db_reload);
 
         tonic::transport::Server::builder()
             .add_service(DaemonServer::new(daemon_health))

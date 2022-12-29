@@ -4,6 +4,7 @@ use anyhow::Result;
 use hogg_common::db::HoggDatabase;
 use hogg_common::env;
 use hogg_daemon::nuclei::NucleiJsonOutput;
+use hogg_grpc::grpc;
 
 fn get_database_dir() -> String {
     Path::new(&env::get_hogg_dir())
@@ -60,7 +61,13 @@ pub async fn get_unviewed() -> Result<()> {
 }
 
 pub async fn flush_detections() -> Result<()> {
+    logs::info!("Flushing detections from database...");
     let mut db = HoggDatabase::<NucleiJsonOutput>::from_file_unconfigured(get_database_dir())?;
     db.flush_detections()?;
+
+    logs::info!("Sending database forced reload to hogg-daemon...");
+    let mut grpc = grpc::connect_grpc_client().await?;
+    grpc.reload_database(grpc::ReloadDatabaseRequest {}).await?;
+
     Ok(())
 }

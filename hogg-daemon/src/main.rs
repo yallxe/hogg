@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         CONFIG = Some(config.clone());
     }
 
-    nuclei::prepare_database(&config);
+    nuclei::load_database(&config);
 
     let config = Arc::new(config);
 
@@ -57,8 +57,10 @@ async fn main() -> Result<()> {
             dns_proxy_task(&config, scan_function).await;
         });
     }
-
-    grpc::tokio_serve_hogg_grpc()?;
+    
+    grpc::tokio_serve_hogg_grpc(move || {
+        nuclei::load_database(&config);
+    })?;
 
     loop {}
 }

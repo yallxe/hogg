@@ -58,8 +58,8 @@ impl Eq for NucleiJsonOutput {}
 static mut DATABASE: Option<HoggDatabase<NucleiJsonOutput>> = None;
 pub const DATABASE_FILENAME: &'static str = ".hoggdb.json";
 
-pub fn prepare_database(config: &HoggConfig) {
-    logs::debug!("Preparing nuclei database");
+pub fn load_database(config: &HoggConfig) {
+    logs::debug!("(Re)loading nuclei database");
     unsafe {
         DATABASE = Some(
             HoggDatabase::from_file(

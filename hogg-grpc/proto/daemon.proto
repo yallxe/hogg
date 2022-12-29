@@ -3,6 +3,14 @@ package daemon;
 
 service Daemon {
     rpc Ping(PingRequest) returns (PingResponse) {}
+    rpc ReloadDatabase(ReloadDatabaseRequest) returns (ReloadDatabaseResponse) {}
+}
+
+message ReloadDatabaseRequest { }
+
+message ReloadDatabaseResponse {
+    bool success = 1;
+    optional string error = 2;
 }
 
 message PingRequest {
