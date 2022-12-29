@@ -1,4 +1,4 @@
-use std::{borrow::BorrowMut, path::Path};
+use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
@@ -91,6 +91,7 @@ impl<T: Clone + Serialize + for<'a> Deserialize<'a>> HoggDatabase<T> {
     ) -> Result<Vec<&mut Detection<T>>, Error> {
         // TODO: fix saving of database
         let mut detections = Vec::new();
+
         for detection in self.structure.detections.iter_mut() {
             if !detection.viewed {
                 if mark_as_viewed {
@@ -99,8 +100,15 @@ impl<T: Clone + Serialize + for<'a> Deserialize<'a>> HoggDatabase<T> {
                 detections.push(detection);
             }
         }
-
+        
+        // self.save()?;
         Ok(detections)
+    }
+
+    pub fn flush_detections(&mut self) -> Result<(), Error> {
+        self.structure.detections = Vec::new();
+        self.save()?;
+        Ok(())
     }
 
     pub fn get_detections(&self, offset: usize, limit: usize) -> Vec<&Detection<T>> {

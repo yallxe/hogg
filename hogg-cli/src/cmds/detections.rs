@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::path::Path;
 
 use anyhow::Result;
@@ -14,7 +13,7 @@ fn get_database_dir() -> String {
         .to_string()
 }
 
-pub async fn run() -> Result<()> {
+pub async fn get_unviewed() -> Result<()> {
     let mut db = HoggDatabase::<NucleiJsonOutput>::from_file_unconfigured(get_database_dir())?;
 
     let detections = db.get_unviewed_detections(true)?;
@@ -57,5 +56,11 @@ pub async fn run() -> Result<()> {
         println!();
     }
     logs::info!("There were {} unviewed detections", detections.len());
+    Ok(())
+}
+
+pub async fn flush_detections() -> Result<()> {
+    let mut db = HoggDatabase::<NucleiJsonOutput>::from_file_unconfigured(get_database_dir())?;
+    db.flush_detections()?;
     Ok(())
 }

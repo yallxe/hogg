@@ -5,7 +5,8 @@ use logs::LevelFilter;
 mod cmds;
 
 #[derive(Parser)]
-#[command()]
+#[command(name = "hogg-cli", version = "0.1.0", author = "yallxe")]
+#[command(about = "A CLI for Hogg")]
 struct CliArgs {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -13,8 +14,12 @@ struct CliArgs {
 
 #[derive(Subcommand)]
 enum Commands {
+    #[command(about = "Ping the Hogg Daemon to check if it's running")]
     Ping,
+    #[command(about = "Get all unviewed detections from hogg database")]
     UnviewedDetections,
+    #[command(about = "Delete all the detections from hogg database")]
+    Flush
 }
 
 #[tokio::main]
@@ -35,6 +40,7 @@ async fn main() -> Result<()> {
     match CliArgs::parse().command {
         Some(Commands::Ping) => cmds::ping_command().await?,
         Some(Commands::UnviewedDetections) => cmds::unviewed_detections_command().await?,
+        Some(Commands::Flush) => cmds::flush_command().await?,
         None => logs::error!("No command given"),
     }
 
