@@ -753,6 +753,8 @@ dependencies = [
  "anyhow",
  "async-trait",
  "clap",
+ "hogg-common",
+ "hogg-daemon",
  "hogg-grpc",
  "logs",
  "tokio",

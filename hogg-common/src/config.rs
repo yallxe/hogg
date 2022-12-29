@@ -47,11 +47,11 @@ pub struct ScannerNucleiConfig {
     pub using_community_templates: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct DatabaseConfig {
     pub save_detections: bool,
     pub detections_limiter_enabled: bool,
-    pub max_detections: usize
+    pub max_detections: usize,
 }
 
 impl HoggConfig {

@@ -7,10 +7,7 @@ pub struct DaemonService {}
 
 #[tonic::async_trait]
 impl Daemon for DaemonService {
-    async fn ping(
-        &self,
-        request: Request<PingRequest>,
-    ) -> Result<Response<PingResponse>, Status> {
+    async fn ping(&self, request: Request<PingRequest>) -> Result<Response<PingResponse>, Status> {
         logs::trace!("Got ping request: {:?}", request);
 
         let reply = PingResponse {

@@ -1,6 +1,6 @@
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 use logs::LevelFilter;
-use anyhow::Result;
 
 mod cmds;
 
@@ -14,6 +14,7 @@ struct CliArgs {
 #[derive(Subcommand)]
 enum Commands {
     Ping,
+    UnviewedDetections,
 }
 
 #[tokio::main]
@@ -24,12 +25,16 @@ async fn main() -> Result<()> {
             logger.init();
         }
         Err(_) => {
-            logs::Logs::new().color(true).level(LevelFilter::Info).init();
+            logs::Logs::new()
+                .color(true)
+                .level(LevelFilter::Info)
+                .init();
         }
     };
 
     match CliArgs::parse().command {
         Some(Commands::Ping) => cmds::ping_command().await?,
+        Some(Commands::UnviewedDetections) => cmds::unviewed_detections_command().await?,
         None => logs::error!("No command given"),
     }
 

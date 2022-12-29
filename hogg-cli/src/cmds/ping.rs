@@ -1,5 +1,5 @@
-use hogg_grpc::grpc;
 use anyhow::Result;
+use hogg_grpc::grpc;
 
 pub async fn run() -> Result<()> {
     let mut grpc = grpc::connect_grpc_client().await?;
