@@ -57,10 +57,12 @@ async fn main() -> Result<()> {
             dns_proxy_task(&config, scan_function).await;
         });
     }
-    
+
     grpc::tokio_serve_hogg_grpc(move || {
         nuclei::load_database(&config);
     })?;
 
-    loop {}
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    }
 }
