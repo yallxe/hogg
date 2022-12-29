@@ -15,28 +15,36 @@ pub enum Error {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct Detection<T> {
+pub struct Detection<T: Eq + PartialEq> {
     pub viewed: bool,
     pub data: T,
 }
 
+impl<T: Eq + PartialEq> PartialEq for Detection<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.data == other.data
+    }
+}
+
+impl<T: Eq + PartialEq> Eq for Detection<T> { }
+
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct DbStruct<T>
 where
-    T: Clone,
+    T: Clone + Eq + PartialEq,
 {
     pub version: String,
     pub detections: Vec<Detection<T>>,
 }
 
-pub struct HoggDatabase<T: Clone + Serialize + for<'a> Deserialize<'a>> {
+pub struct HoggDatabase<T: Clone + Eq + PartialEq + Serialize + for<'a> Deserialize<'a>> {
     pub path: String,
     pub structure: DbStruct<T>,
 
     pub config: DatabaseConfig,
 }
 
-impl<T: Clone + Serialize + for<'a> Deserialize<'a>> HoggDatabase<T> {
+impl<T: Clone + Eq + PartialEq + Serialize + for<'a> Deserialize<'a>> HoggDatabase<T> {
     pub fn from_file(path: String, config: HoggConfig) -> Result<Self, Error> {
         if !Path::new(&path).exists() {
             std::fs::write(
@@ -78,11 +86,18 @@ impl<T: Clone + Serialize + for<'a> Deserialize<'a>> HoggDatabase<T> {
         Ok(())
     }
 
-    pub fn add_detection(&mut self, detection: T) {
-        self.structure.detections.push(Detection {
+    pub fn add_detection(&mut self, detection: T) -> bool {
+        // return true if detection was added, false if it already existed
+        let detection = Detection {
             viewed: false,
             data: detection,
-        });
+        };
+
+        if !self.structure.detections.contains(&detection) {
+            self.structure.detections.push(detection);
+            return true;
+        }
+        false
     }
 
     pub fn get_unviewed_detections(

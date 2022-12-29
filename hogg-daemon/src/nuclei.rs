@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::notifications;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct NucleiTreeInfo {
     pub name: String,
     pub author: Vec<String>,
@@ -43,6 +43,17 @@ pub struct NucleiJsonOutput {
     #[serde(rename = "matched-line")]
     pub matched_line: Option<String>,
 }
+
+impl PartialEq for NucleiJsonOutput {
+    fn eq(&self, other: &Self) -> bool {
+        self.template_id == other.template_id && 
+        self.matched_at == other.matched_at && 
+        self.host == other.host && 
+        self.info == other.info
+    }
+}
+
+impl Eq for NucleiJsonOutput {}
 
 static mut DATABASE: Option<HoggDatabase<NucleiJsonOutput>> = None;
 pub const DATABASE_FILENAME: &'static str = ".hoggdb.json";
@@ -104,18 +115,21 @@ pub async fn scan_with_nuclei(
                 continue;
             }
         };
-
-        logs::debug!("New nuclei profits: {:#?}", json);
+        
         unsafe {
             if config.database.save_detections {
                 // WHY RUST CAN'T JUST HAVE UNSAFE IF
                 let db = DATABASE.as_mut().unwrap();
-                db.add_detection(json.clone());
-                db.save()?;
+                if db.add_detection(json.clone()) {
+                    db.save()?;
+
+                    logs::debug!("New nuclei profits: {:#?}", json);
+                    notifications::show_detections_notification(&domain);
+                    answers.push(json);
+                }
             }
         }
-        answers.push(json);
-        notifications::show_detections_notification(&domain);
+        
     }
 
     Ok(answers)
