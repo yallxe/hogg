@@ -44,6 +44,8 @@ async fn main() -> Result<()> {
         CONFIG = Some(config.clone());
     }
 
+    nuclei::prepare_database(&config);
+
     let config = Arc::new(config);
 
     {

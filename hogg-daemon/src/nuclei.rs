@@ -1,7 +1,7 @@
-use std::vec;
+use std::{vec, path::Path};
 
 use anyhow::Result;
-use hogg_common::{config::HoggConfig, ssladapter};
+use hogg_common::{config::HoggConfig, ssladapter, db::HoggDatabase};
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
     process::Command,
@@ -21,7 +21,7 @@ pub struct NucleiTreeInfo {
     pub reference: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NucleiJsonOutput {
     pub template: String,
     #[serde(rename = "template-id")]
@@ -42,6 +42,20 @@ pub struct NucleiJsonOutput {
     pub matcher_status: bool,
     #[serde(rename = "matched-line")]
     pub matched_line: Option<String>,
+}
+
+static mut DATABASE: Option<HoggDatabase<NucleiJsonOutput>> = None;
+pub const DATABASE_FILENAME: &'static str = ".hoggdb.json";
+
+pub fn prepare_database(config: &HoggConfig) {
+    logs::debug!("Preparing nuclei database");
+    unsafe {
+        DATABASE = Some(HoggDatabase::from_file(
+            Path::new(&config._file).parent().unwrap().join(DATABASE_FILENAME).as_path().to_str().unwrap().to_string(),
+            config.clone(),
+        )
+        .unwrap());
+    }
 }
 
 pub async fn scan_with_nuclei(
@@ -83,8 +97,13 @@ pub async fn scan_with_nuclei(
         };
 
         logs::debug!("New nuclei profits: {:#?}", json);
-        notifications::show_detections_notification(&domain);
+        unsafe { if config.database.save_detections { // WHY RUST CAN'T JUST HAVE UNSAFE IF
+            let db = DATABASE.as_mut().unwrap();
+            db.add_detection(json.clone());
+            db.save()?;
+        } }
         answers.push(json);
+        notifications::show_detections_notification(&domain);
     }
 
     Ok(answers)

@@ -765,11 +765,13 @@ dependencies = [
  "anyhow",
  "async-trait",
  "directories",
+ "err-derive",
  "include_dir",
  "logs",
  "reqwest",
  "serde",
  "serde_derive",
+ "serde_json",
  "toml",
 ]
 
