@@ -1,5 +1,7 @@
 [workspace]
 members = [
     "hogg-daemon",
+    "hogg-grpc",
+    "hogg-cli",
     "hogg-common"
 ]

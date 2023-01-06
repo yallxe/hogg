@@ -1,7 +1,7 @@
-use std::vec;
+use std::{path::Path, vec};
 
 use anyhow::Result;
-use hogg_common::{config::HoggConfig, ssladapter};
+use hogg_common::{config::HoggConfig, db::HoggDatabase, ssladapter};
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
     process::Command,
@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::notifications;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct NucleiTreeInfo {
     pub name: String,
     pub author: Vec<String>,
@@ -21,7 +21,7 @@ pub struct NucleiTreeInfo {
     pub reference: Option<Vec<String>>,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NucleiJsonOutput {
     pub template: String,
     #[serde(rename = "template-id")]
@@ -42,6 +42,40 @@ pub struct NucleiJsonOutput {
     pub matcher_status: bool,
     #[serde(rename = "matched-line")]
     pub matched_line: Option<String>,
+}
+
+impl PartialEq for NucleiJsonOutput {
+    fn eq(&self, other: &Self) -> bool {
+        self.template_id == other.template_id && 
+        self.matched_at == other.matched_at && 
+        self.host == other.host && 
+        self.info == other.info
+    }
+}
+
+impl Eq for NucleiJsonOutput {}
+
+static mut DATABASE: Option<HoggDatabase<NucleiJsonOutput>> = None;
+pub const DATABASE_FILENAME: &'static str = ".hoggdb.json";
+
+pub fn load_database(config: &HoggConfig) {
+    logs::debug!("(Re)loading nuclei database");
+    unsafe {
+        DATABASE = Some(
+            HoggDatabase::from_file(
+                Path::new(&config._file)
+                    .parent()
+                    .unwrap()
+                    .join(DATABASE_FILENAME)
+                    .as_path()
+                    .to_str()
+                    .unwrap()
+                    .to_string(),
+                config.clone(),
+            )
+            .unwrap(),
+        );
+    }
 }
 
 pub async fn scan_with_nuclei(
@@ -81,10 +115,21 @@ pub async fn scan_with_nuclei(
                 continue;
             }
         };
+        
+        unsafe {
+            if config.database.save_detections {
+                // WHY RUST CAN'T JUST HAVE UNSAFE IF
+                let db = DATABASE.as_mut().unwrap();
+                if db.add_detection(json.clone()) {
+                    db.save()?;
 
-        logs::debug!("New nuclei profits: {:#?}", json);
-        notifications::show_detections_notification(&domain);
-        answers.push(json);
+                    logs::debug!("New nuclei profits: {:#?}", json);
+                    notifications::show_detections_notification(&domain);
+                    answers.push(json);
+                }
+            }
+        }
+        
     }
 
     Ok(answers)

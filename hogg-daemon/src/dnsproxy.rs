@@ -1,14 +1,14 @@
-use std::{future::Future, time::Duration, collections::HashMap};
+use std::{collections::HashMap, future::Future, time::Duration};
 
 use anyhow::{anyhow, Result};
+use chrono;
 use hogg_common::{
     config::HoggConfig,
     dnslib::{BytePacketBuffer, DnsPacket},
 };
 use lazy_static::lazy_static;
-use tokio::{net::UdpSocket, time::timeout};
 use std::sync::Mutex;
-use chrono;
+use tokio::{net::UdpSocket, time::timeout};
 
 type FA<R> = fn(String) -> R;
 lazy_static! {
@@ -19,6 +19,11 @@ pub async fn dns_proxy_task(
     config: &HoggConfig,
     scan_function: FA<impl Future<Output = ()> + Send + 'static>,
 ) {
+    if !config.dnsproxy.enabled {
+        logs::warn!("DNS Proxy is disabled.");
+        return;
+    }
+
     let socket = match UdpSocket::bind(config.dnsproxy.bind.clone()).await {
         Ok(socket) => socket,
         Err(e) => {
@@ -56,7 +61,7 @@ pub async fn dns_proxy_task(
             let domain = q.name.to_string();
             let now = chrono::Utc::now().timestamp() as u64;
             let mut scan_cache = SCAN_CACHE.lock().unwrap();
-            
+
             if let Some(last_scan) = scan_cache.get(&domain) {
                 // Domain has been scanned before, check if TTL has expired
                 if now - last_scan > config.scanner.cache_ttl.into() {

@@ -1,4 +1,5 @@
 [dnsproxy]
+enabled = true
 bind = "127.0.0.1:53"
 upstreams = ["1.1.1.1:53", "8.8.8.8:53"]
 
@@ -22,3 +23,8 @@ using-community-templates = [
     "exposures/files/ds-store-file.yaml",
     "misconfiguration/server-status-localhost.yaml",
 ]
+
+[database]
+save_detections = true # better do not turn it off, detections will be printed only to daemon stdout
+detections_limiter_enabled = true
+max_detections = 1000

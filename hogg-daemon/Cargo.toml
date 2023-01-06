@@ -3,10 +3,15 @@ name = "hogg-daemon"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "hogg-daemon"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 hogg-common = { path = "../hogg-common" }
+hogg-grpc = { path = "../hogg-grpc" }
 
 anyhow = "1.0.68"
 include_dir = { version = "0.7.3", features = ["glob"] }

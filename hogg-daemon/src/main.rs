@@ -1,7 +1,8 @@
-use std::path::Path;
+use std::{path::Path, sync::Arc};
 
 use anyhow::Result;
 use dnsproxy::dns_proxy_task;
+use hogg_grpc::grpc;
 use include_dir::{include_dir, Dir};
 
 use hogg_common::{
@@ -11,7 +12,7 @@ use hogg_common::{
 
 mod dnsproxy;
 mod notifications;
-mod nuclei;
+pub mod nuclei;
 
 static CONFIG_TEMPLATE: Dir<'_> = include_dir!("resources/config-template");
 static mut CONFIG: Option<HoggConfig> = None;
@@ -27,7 +28,10 @@ async fn scan_function(domain: String) {
 async fn main() -> Result<()> {
     match logs::Logs::new().level_from_default_env() {
         Ok(logs) => logs.color(true).init(),
-        Err(_) => logs::Logs::new().level(logs::LevelFilter::Info).color(true).init(),
+        Err(_) => logs::Logs::new()
+            .level(logs::LevelFilter::Info)
+            .color(true)
+            .init(),
     }
 
     let config_path = env::get_hogg_dir();
@@ -43,6 +47,22 @@ async fn main() -> Result<()> {
         CONFIG = Some(config.clone());
     }
 
-    dns_proxy_task(&config, scan_function).await;
-    Ok(())
+    nuclei::load_database(&config);
+
+    let config = Arc::new(config);
+
+    {
+        let config = config.clone();
+        tokio::spawn(async move {
+            dns_proxy_task(&config, scan_function).await;
+        });
+    }
+
+    grpc::tokio_serve_hogg_grpc(move || {
+        nuclei::load_database(&config);
+    })?;
+
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    }
 }
