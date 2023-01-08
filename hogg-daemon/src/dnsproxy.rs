@@ -40,7 +40,7 @@ pub async fn dns_proxy_task(
             Err(_) => continue,
         };
 
-        let mut upstream_response =
+        let (mut resp, len) =
             match dispatch_incoming(req, len, config.dnsproxy.upstreams.clone()).await {
                 Ok(res) => res,
                 Err(e) => {
@@ -49,11 +49,11 @@ pub async fn dns_proxy_task(
                 }
             };
 
-        if let Err(e) = socket.send_to(&upstream_response.buf, &src).await {
+        if let Err(e) = socket.send_to(&resp.buf[..len], &src).await {
             logs::error!("DNS Proxy failed to send packet to downstream: {}", e)
         }
 
-        if let Some(q) = DnsPacket::from_buffer(&mut upstream_response)
+        if let Some(q) = DnsPacket::from_buffer(&mut resp)
             .unwrap()
             .questions
             .get(0)
@@ -88,20 +88,19 @@ pub async fn dispatch_incoming(
     req: BytePacketBuffer,
     len: usize,
     upstreams: Vec<String>,
-) -> Result<BytePacketBuffer> {
+) -> Result<(BytePacketBuffer, usize)> {
     let buf = &req.buf[..len];
 
     for addr in upstreams {
         let socket = UdpSocket::bind(("0.0.0.0", 0)).await?;
 
-        let data: Result<BytePacketBuffer> = match timeout(Duration::from_secs(3), async {
+        let data: Result<(BytePacketBuffer, usize)> = match timeout(Duration::from_secs(3), async {
             socket.send_to(buf, addr).await?;
             let mut res = BytePacketBuffer::new();
-            socket.recv_from(&mut res.buf).await?;
-            Ok(res)
+            let (len, _) = socket.recv_from(&mut res.buf).await?;
+            Ok((res, len))
         })
-        .await
-        {
+        .await {
             Ok(data) => data,
             Err(_) => continue,
         };
