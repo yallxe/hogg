@@ -9,7 +9,7 @@ edition = "2021"
 err-derive = "0.3.1"
 logs = "0.7.1"
 prost = "0.11.5"
-tokio = { version = "1.23.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.24.2", features = ["macros", "rt-multi-thread"] }
 tonic = "0.8.3"
 
 [build-dependencies]

@@ -14,4 +14,4 @@ anyhow = "1.0.68"
 async-trait = "0.1.60"
 clap = { version = "4.0.32", features = ["derive", "cargo"] }
 logs = "0.7.1"
-tokio = "1.23.0"
+tokio = "1.24.2"
